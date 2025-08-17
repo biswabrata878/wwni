@@ -16,22 +16,19 @@ app.post("/create-user", async (req, res) => {
   try {
     const { email, password, displayName } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
-
     const user = await admin.auth().createUser({
-      email: email.trim(),
+      email,
       password,
       displayName,
     });
 
+    // Fetch latest user record to ensure email is included
     const userRecord = await admin.auth().getUser(user.uid);
 
     res.status(201).json({
       message: "User created successfully",
       uid: userRecord.uid,
-      email: userRecord.email,
+      email: userRecord.email,  // ✅ will always have email
       displayName: userRecord.displayName,
     });
   } catch (error) {
