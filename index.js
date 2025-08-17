@@ -22,7 +22,7 @@ app.post("/create-user", async (req, res) => {
       password,
       displayName,
     });
-
+ const userRecord = await admin.auth().getUser(user.uid);
     res.status(201).json({
       message: "User created successfully",
       uid: userRecord.uid,
