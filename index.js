@@ -12,7 +12,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// ✅ API route to create user
 app.post("/create-user", async (req, res) => {
   try {
     const { email, password, displayName } = req.body;
@@ -39,4 +38,3 @@ app.post("/create-user", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
