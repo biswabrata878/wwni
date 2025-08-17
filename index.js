@@ -25,8 +25,9 @@ app.post("/create-user", async (req, res) => {
 
     res.status(201).json({
       message: "User created successfully",
-      uid: user.uid,
-      email: user.email,
+      uid: userRecord.uid,
+      email: userRecord.email,  
+      displayName: userRecord.displayName,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
