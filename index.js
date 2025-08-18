@@ -1,37 +1,31 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const admin = require("firebase-admin");
+import express from "express";
+import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+
+if (!getApps().length) {
+  initializeApp({
+    credential: cert({
+      project_id: process.env.FIREBASE_PROJECT_ID,
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+    }),
+  });
+}
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Initialize Firebase Admin SDK
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+// Example route: Create Firebase User
+app.post("/createUser", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await getAuth().createUser({ email, password });
+    res.json({ message: "User created", uid: user.uid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post("/create-user", async (req, res) => {
-  try {
-    const { email, password, displayName } = req.body;
-
-    const user = await admin.auth().createUser({
-      email,
-      password,
-      displayName,
-    });
-
-    // Fetch latest user record to ensure email is included
-    const userRecord = await admin.auth().getUser(user.uid);
-
-    res.status(201).json({
-      message: "User created successfully",
-      uid: userRecord.uid,
-      email: userRecord.email,  // ✅ will always have email
-      displayName: userRecord.displayName,
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+app.listen(10000, () => {
+  console.log("Server running on port 10000");
 });
